@@ -1,0 +1,32 @@
+.content {
+  padding: var(--s3);
+}
+
+.contents-preview {
+  position: relative;
+  height: calc(100vh - 156px);
+}
+
+.contents-preview.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--secondary);
+}
+
+.contents-preview:not(.empty) .drop-here-img {
+  display: none;
+}
+
+.contents-preview.empty::after {
+  content: "اضغط لاختيار ملف او قم بسحب الملف إلي هنا";
+}
+
+.contents-preview.dragover::after {
+  content: "افلت الملف هنا";
+}
+
+.contents-preview.dragover .drop-here-img {
+  animation: blink 0.5s linear alternate infinite;
+}

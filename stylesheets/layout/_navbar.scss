@@ -1,0 +1,8 @@
+.navbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s3);
+  background-color: var(--bg-2);
+  font-size: var(--fs5);
+}

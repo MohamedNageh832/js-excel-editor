@@ -1,0 +1,33 @@
+.flex {
+  display: flex;
+}
+
+@for $i from 1 through 6 {
+  .gap-#{$i} {
+    gap: var(--s#{$i});
+  }
+
+  .mt-#{$i} {
+    margin-top: var(--s#{$i});
+  }
+}
+
+.c-blue {
+  color: var(--green);
+}
+
+.hidden {
+  display: none;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.pos-sticky {
+  position: sticky;
+  top: 0;
+  background: var(--table-head);
+  color: #fff;
+}

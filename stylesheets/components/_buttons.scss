@@ -1,0 +1,26 @@
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s3);
+  border-radius: var(--bRadius1);
+}
+
+.btn--primary {
+  background-color: var(--blue);
+  color: #fff;
+}
+
+.btn--secondary {
+  background-color: var(--grey-100);
+}
+
+.btn--secondary:hover {
+  background-color: var(--grey-200);
+}
+
+.btn--secondary.active {
+  background-color: var(--light-blue);
+  color: var(--blue);
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./stylesheets/style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <nav class="navbar">
+        <h4>محرر <span class="c-blue">Excel</span></h4>
+
+        <section class="flex gap-3">
+          <div class="form-file">
+            <input
+              class="form-file__input file_input"
+              type="file"
+              multiple="multiple"
+            />
+            <button class="btn btn--primary" id="test">
+              <img
+                class="icon"
+                src="./assets/svg/upload_file_icon.svg"
+                alt="Choose file"
+              />
+              اختر ملف
+            </button>
+          </div>
+          <button class="btn btn--secondary merge-btn">دمج الملفات</button>
+          <button class="btn btn--secondary save-btn">حفظ</button>
+          <button class="btn btn--secondary enable-borders-btn">
+            تفعيل الفواصل
+          </button>
+          <button class="btn btn--secondary merge-columns-btn">
+            دمج الاعمدة
+          </button>
+        </section>
+      </nav>
+
+      <section class="content">
+        <main class="widget contents-preview empty">
+          <img
+            class="drop-here-img"
+            src="./assets/svg/download_icon.svg"
+            alt="Drop here"
+          />
+          <input
+            class="form-file__input file_input"
+            type="file"
+            multiple="multiple"
+          />
+          <nav class="tabs"></nav>
+          <section class="table-holder">
+            <table class="table"></table>
+          </section>
+          <nav class="pages"></nav>
+        </main>
+      </section>
+    </div>
+
+    <script src="./scripts/xlsx.full.min.js"></script>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>

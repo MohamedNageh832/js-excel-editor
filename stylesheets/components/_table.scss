@@ -1,0 +1,134 @@
+.contents-preview.empty .tabs,
+.contents-preview.empty .table-holder,
+.contents-preview.empty .pages {
+  display: none;
+}
+
+.table-holder {
+  overflow: auto;
+  height: calc(100% - 90px);
+  background-color: #fff;
+}
+
+@keyframes blink {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.1;
+  }
+}
+
+.table-holder.empty .table {
+  display: none;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--s3);
+  padding: 0 var(--s2) var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.tabs__btn {
+  position: relative;
+  border-bottom: 2px solid transparent;
+  color: var(--secondary);
+  background-color: inherit;
+  font-size: 16px;
+}
+
+.tabs__btn.active {
+  color: #000;
+  border-color: #000;
+}
+
+.tab__close-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 0;
+  display: none;
+  background-color: var(--bg-2);
+}
+
+.tabs__btn:hover .tab__close-btn {
+  display: block;
+}
+
+.tab__close-icon {
+  opacity: 0.5;
+  width: 20px;
+  height: 20px;
+  margin-bottom: -7px;
+}
+
+.tab__close-btn:hover .tab__close-icon {
+  opacity: 1;
+}
+
+.table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.table.borders td {
+  border: 1px solid #ddd;
+}
+
+.table__row {
+  transition: all 0.25s ease-in-out;
+}
+
+.table__row:nth-child(2n + 1) {
+  background-color: var(--bg-1);
+}
+
+.table__head {
+  background: var(--table-head);
+  color: #fff;
+}
+
+.table__cell {
+  padding: var(--s2) var(--s3);
+  border: 2px solid transparent;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+.table__cell:has(.cell__input:focus) {
+  border-color: var(--blue);
+}
+
+.table__row-options {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.cell__input,
+.cell__input:focus-visible {
+  border: none;
+  outline: none;
+}
+
+.pages {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--s3);
+  overflow: auto;
+  padding: var(--s3);
+  background-color: var(--bg-2);
+}
+
+.pages__btn {
+  font-size: var(--fs1);
+}
+
+.pages__btn.active {
+  background-color: var(--light-blue);
+}
