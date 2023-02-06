@@ -528,40 +528,66 @@ function checkAvailableData(fileNames) {
   return result;
 }
 
+// ! BUG: Values are doubled
+
 function mergeSimilarColumns(fileNames, columns) {
-  const result = [columns, arrayOf(columns.length, 0)];
+  let intialValues = [columns, arrayOf(columns.length, 0)];
+  return fileNames.reduce((prev, currFile) => {
+    return getTotalValues(prev, columns, currFile);
+  }, intialValues);
+}
 
-  fileNames.forEach((file) => {
-    const pages = Object.keys(excelData[file]);
-    const pagesToSkip = [0];
-    const rowsToSkip = [51, 52];
+function getTotalValues(intialValues, columns, file) {
+  const pages = Object.keys(excelData[file]);
+  const rowsToSkip = [51, 52, 53];
+  const pagesToSkip = [0];
 
-    pages.forEach((page, i) => {
-      if (pagesToSkip.includes(i)) return;
+  const finalValues = pages.reduce((prev, curr, i) => {
+    if (pagesToSkip.includes(i)) return prev;
 
-      const pageData = excelData[file][page];
-      const indexes = pageData[1].reduce(
-        (prev, curr) => [...prev, columns.indexOf(curr)],
-        []
-      );
+    const pageData = excelData[file][curr];
+    const indexes = getIndexes(columns, pageData[1]);
 
-      console.log(indexes);
+    // pageData.forEach((row, j) => {
+    //   if (j < 2 || rowsToSkip.includes(j)) return prev;
 
-      pageData.forEach((row, j) => {
-        if (j < 2 || rowsToSkip.includes(j)) return;
+    //   console.log(pageData, prev, j, i);
 
-        row.forEach((el, k) => {
-          if (indexes[k] === -1) return;
+    //   return addRowValues(row, prev, indexes);
+    // });
 
-          if (!isNaN(+el)) result[1][indexes[k]] = result[1][indexes[k]] + +el;
-        });
+    let result = null;
 
-        console.log(result[1], row, j);
-      });
-    });
+    for (let j = 0; j < pageData.length; j++) {
+      const row = pageData[j];
+      if (j < 2 || rowsToSkip.includes(j)) continue;
+
+      console.log(addRowValues(row, prev, indexes));
+
+      result = addRowValues(row, prev, indexes);
+    }
+
+    return result;
+  }, intialValues);
+
+  return finalValues;
+}
+
+function getIndexes(columns, pageHeader) {
+  return pageHeader.reduce(
+    (prev, curr) => [...prev, columns.indexOf(curr)],
+    []
+  );
+}
+
+function addRowValues(row, result, indexes) {
+  row.forEach((el, k) => {
+    if (indexes[k] === -1) return;
+
+    if (!isNaN(+el)) result[1][indexes[k]] = result[1][indexes[k]] + +el;
   });
 
-  console.log(result);
+  return result;
 }
 
 function arrayOf(length, value) {
