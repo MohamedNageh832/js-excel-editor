@@ -55,8 +55,6 @@ class FilesManager {
     const sheets = Object.keys(data);
     const paperData = data[sheets[0]];
 
-    Utils.makeRowSameLength(paperData);
-
     Components.openNewTab(FilesManager.activeFile);
 
     Utils.createTable({
@@ -204,22 +202,25 @@ class Components {
   static tableCell({ value, className }) {
     const td = document.createElement("td");
 
-    td.className = `table__cell ${className ? className : ""}`;
+    td.className = className ? className : "";
     td.textContent = value || "";
 
     return td;
   }
 
-  static optionsCell({ inHead, tr, value, className }) {
+  static optionsCell({ tr, rowIndex, className }) {
     const td = document.createElement("td");
-    td.textContent = value;
+    td.textContent = rowIndex + 1;
     if (className) td.className = className;
+    const inHead = rowIndex === 0;
 
     if (!inHead) {
       //   const img = document.createElement("img");
 
       //   img.src = "./assets/svg/drag_indicator_icon.svg";
       //   img.className = "table__row-options";
+
+      Utils.addNumberingCellEvents({ orientation: "row", td, index: rowIndex });
 
       td.addEventListener("dblclick", () => {
         if (tr.classList.contains("pos-sticky"))
@@ -247,6 +248,9 @@ class Components {
         className: "table__number",
       });
 
+      tr.appendChild(td);
+
+      if (i === 0) return;
       td.addEventListener("dblclick", () => {
         const sameColumnCells = Array.from(
           document.querySelectorAll(`.table__cell:nth-child(${i + 1})`)
@@ -269,7 +273,7 @@ class Components {
         });
       });
 
-      tr.appendChild(td);
+      Utils.addNumberingCellEvents({ td, index: 0 });
     });
 
     tableElement.appendChild(tr);
@@ -277,15 +281,17 @@ class Components {
       const tr = Components.tableRow({ head: i === 0 });
 
       row.forEach((cell) => {
-        const td = Components.tableCell({ value: cell });
+        const td = Components.tableCell({
+          className: "table__cell",
+          value: cell,
+        });
         if (i !== 0) Utils.addTableCellEvents(td);
         tr.appendChild(td);
       });
 
       const td = Components.optionsCell({
-        inHead: i === 0,
+        rowIndex: i,
         tr,
-        value: i + 1,
         className: "table__number table__number--vertical",
       });
 
@@ -295,8 +301,32 @@ class Components {
     });
   }
 
-  static cellContextMenu() {
-    // const
+  static cellContextMenu(index) {
+    const menu = document.createElement("ul");
+    menu.className = "menu cell__context-menu";
+
+    const options = [
+      {
+        text: "اضافة اجمالي ملفات",
+        action: () => {
+          FormBuilder.createFindtotalForm({
+            insert: "values",
+            insertInto: "row",
+            index,
+          });
+        },
+      },
+    ];
+
+    options.forEach((option) => {
+      const listItem = document.createElement("li");
+      listItem.className = "context-menu__option";
+      listItem.textContent = option.text;
+      listItem.addEventListener("click", option.action);
+      menu.appendChild(listItem);
+    });
+
+    return menu;
   }
 
   static filePaginationButton({ makeActive, sheetName }) {
@@ -318,7 +348,6 @@ class Components {
 
       const fileName = FilesManager.activeFile;
       const paperData = FilesManager.openedFiles[fileName][sheetName];
-      Utils.makeRowSameLength(paperData);
       Utils.createTable({ fileName, sheetName, data: paperData });
     });
 
@@ -429,6 +458,36 @@ class Utils {
     });
   }
 
+  static addNumberingCellEvents({ orientation, td, index }) {
+    td.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+
+      if (orientation === "column") {
+        const sameColumnCells = Array.from(
+          document.querySelectorAll(`.table__cell:nth-child(${i + 1})`)
+        );
+      } else if (orientation === "row") {
+        const parentEl = td.parentElement;
+        if (parentEl.classList.contains("selected")) {
+          parentEl.classList.remove("selected");
+        } else {
+          parentEl.classList.add("selected");
+        }
+      }
+
+      const openedMenu = document.querySelector(".menu");
+      if (openedMenu) {
+        openedMenu.remove();
+        const selectedRow = document.querySelector(".table__row.selected");
+        if (selectedRow) selectedRow.classList.remove("selected");
+      }
+
+      const contextmenu = Components.cellContextMenu(index);
+
+      td.appendChild(contextmenu);
+    });
+  }
+
   static editTab(tabEl) {
     const oldValue = tabEl.textContent;
     const input = Components.input({
@@ -453,11 +512,12 @@ class Utils {
   }
 
   static createTable({ fileName, sheetName, data, sheets }) {
+    const adjustedData = Utils.makeRowSameLength(data);
     FilesManager.activeFile = fileName;
     FilesManager.activeSheet = sheetName;
     if (sheets) Components.pagesNav(pagesNav, sheets);
 
-    Components.tableBody(previewTable, data);
+    Components.tableBody(previewTable, adjustedData);
   }
 
   static makeRowSameLength(data) {
@@ -475,6 +535,8 @@ class Utils {
         }
       }
     });
+
+    return data;
   }
 
   static renameTab({ input, parentEl, oldValue }) {
@@ -567,8 +629,6 @@ class Utils {
       });
     });
 
-    console.log(result);
-
     return result;
   }
 
@@ -641,12 +701,30 @@ class Utils {
       });
     });
   }
+
+  static createNewFile() {
+    const fileName = "New file.xlsx";
+    const sheetName = "1";
+    let data = Utils.arrayOf(25, "");
+    data = data.map((_) => Utils.arrayOf(10, ""));
+
+    Components.openNewTab(fileName);
+
+    Utils.createTable({
+      fileName,
+      sheetName,
+      sheets: ["1"],
+      data,
+    });
+
+    FilesManager.openedFiles[fileName] = { [sheetName]: data };
+  }
 }
 
 // ========================================== FormBuilder ============================================== //
 
 class FormBuilder {
-  static createFindtotalForm(data) {
+  static createFindtotalForm({ insert, insertInto, index }) {
     const { form, formControls, overlay, values } =
       Components.form("حدد الملفات");
     const { openedFiles } = FilesManager;
@@ -670,7 +748,27 @@ class FormBuilder {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const columns = Utils.checkAvailableColumns(values.filesToMerge, [0]);
-      Utils.mergeSimilarColumns(values.filesToMerge, columns);
+      const newData = Utils.mergeSimilarColumns(values.filesToMerge, columns);
+
+      if (insertInto === "row") {
+        console.log(index);
+
+        const { activeFile, activeSheet, openedFiles } = FilesManager;
+        openedFiles[activeFile][activeSheet][index] =
+          insert === "title" ? newData[0] : newData[1];
+
+        const data = openedFiles[activeFile][activeSheet];
+        const sheets = Object.keys(openedFiles[activeFile]);
+
+        console.log(data);
+
+        Utils.createTable({
+          fileName: activeFile,
+          sheetName: activeSheet,
+          data,
+          sheets,
+        });
+      }
     });
 
     document.body.append(overlay, form);
@@ -720,4 +818,24 @@ getTotalBtn.addEventListener("click", () => {
 
   if (noFilesOpened) return;
   FormBuilder.createFindtotalForm();
+});
+
+// Create new file
+const createNewFileBtn = document.querySelector(".tabs__create-new");
+
+createNewFileBtn.addEventListener("click", () => {
+  Utils.createNewFile();
+});
+
+// =========================================== Window events ============================================= //
+
+window.addEventListener("click", (e) => {
+  if (!e.target.classList.contains("menu")) {
+    const openedMenus = document.querySelectorAll(".menu");
+    if (openedMenus.length > 0) {
+      openedMenus.forEach((el) => el.remove());
+      const selectedRow = document.querySelector(".table__row.selected");
+      if (selectedRow) selectedRow.classList.remove("selected");
+    }
+  }
 });

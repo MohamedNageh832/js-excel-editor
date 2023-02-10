@@ -32,3 +32,11 @@ input {
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.7);
 }
+
+td {
+  font-size: inherit;
+}
+
+ul {
+  list-style: none;
+}

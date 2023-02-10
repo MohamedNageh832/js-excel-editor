@@ -20,7 +20,7 @@
 :root {
   --bg-1: #f2f5f7;
   --bg-2: #fff;
-  --table-head: linear-gradient(269.77deg, #027de5 7.83%, #67a5d9 108.15%);
+  --table-head: linear-gradient(269.77deg, #00b894 7.83%, #039175 108.15%);
   --s1: 0.25rem;
   --s2: 0.5rem;
   --s3: 1rem;
@@ -115,6 +115,14 @@ input {
   background-color: rgba(0, 0, 0, 0.7);
 }
 
+td {
+  font-size: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
 .widget {
   padding: var(--s3);
   border-radius: var(--bRadius1);
@@ -156,6 +164,7 @@ input {
 
 .tabs {
   display: flex;
+  gap: var(--s3);
   padding: 0 var(--s2) var(--s2);
   margin-bottom: var(--s2);
 }
@@ -169,7 +178,6 @@ input {
   height: 30px;
   padding-left: 2px;
   padding-bottom: 3px;
-  margin-right: var(--s3);
   background-color: inherit;
   font-size: 24px;
   font-weight: 300;
@@ -226,9 +234,32 @@ input {
   opacity: 1;
 }
 
+.contents-preview:not(.empty) .table {
+  -webkit-animation: tableAnimation 0.81s ease-in-out forwards;
+          animation: tableAnimation 0.81s ease-in-out forwards;
+}
+
+@-webkit-keyframes tableAnimation {
+  0% {
+    border-spacing: 230px;
+  }
+  100% {
+    border-spacing: 0;
+  }
+}
+
+@keyframes tableAnimation {
+  0% {
+    border-spacing: 230px;
+  }
+  100% {
+    border-spacing: 0;
+  }
+}
 .table {
   width: 100%;
   border-spacing: 0;
+  font-size: 14px;
 }
 
 .table.borders td {
@@ -249,6 +280,19 @@ input {
   background-color: var(--bg-1);
 }
 
+.table__row.selected td {
+  border-top: 2px solid var(--blue);
+  border-bottom: 2px solid var(--blue);
+}
+
+.table__row.selected td:first-child {
+  border-right: 2px solid var(--blue);
+}
+
+.table__row.selected td:last-child {
+  border-left: 2px solid var(--blue);
+}
+
 .table__head {
   background: var(--table-head);
   color: #fff;
@@ -262,8 +306,7 @@ input {
 
 .table__cell {
   padding: var(--s2) var(--s3);
-  border: 2px solid transparent;
-  font-size: 14px;
+  border: 1px solid transparent;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -278,18 +321,22 @@ input {
   position: -webkit-sticky;
   position: sticky;
   right: 0;
+  width: 40px;
+  height: 25px;
+  padding-left: var(--s2);
+  padding-right: var(--s2);
   background-color: var(--bg-1);
   color: #000;
 }
 
 .table__number--vertical {
-  top: 39.3px;
+  top: 25px;
   z-index: 3;
 }
 
 .table__number.sticky-column {
   z-index: 3;
-  right: 34.67px;
+  right: 32.35px;
 }
 
 .pos-sticky .table__number {
@@ -301,6 +348,30 @@ input {
   border-left: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   text-align: center;
+}
+
+.cell__context-menu {
+  position: absolute;
+  top: -8px;
+  right: 34px;
+  z-index: 4;
+  min-width: 200px;
+  box-shadow: 1px 1px 1px #eee, -1px -1px 1px #eee;
+  padding: var(--s2);
+  border-radius: var(--bRadius1);
+  background-color: #fff;
+}
+
+.context-menu__option {
+  padding: var(--s1);
+  cursor: pointer;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.context-menu__option:hover {
+  background-color: #f5f5f5;
 }
 
 .table__row-options {
@@ -365,6 +436,7 @@ input {
   display: flex;
   flex-direction: column;
   gap: var(--s3);
+  z-index: 6;
   padding: var(--s3);
 }
 
@@ -412,6 +484,7 @@ input {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 5;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
@@ -485,7 +558,7 @@ input {
 .pos-sticky {
   position: -webkit-sticky;
   position: sticky;
-  top: 39.3px;
+  top: 25px;
   background: var(--table-head);
   color: #fff;
 }
@@ -493,8 +566,8 @@ input {
 .pos-sticky--x {
   position: -webkit-sticky;
   position: sticky;
-  top: 39.3px;
-  right: 34.67px;
+  top: 25px;
+  right: 32.35px;
   background: var(--table-head);
   color: #fff;
 }
