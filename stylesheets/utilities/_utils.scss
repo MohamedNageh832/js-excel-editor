@@ -27,7 +27,15 @@
 
 .pos-sticky {
   position: sticky;
-  top: 0;
+  top: 39.3px;
+  background: var(--table-head);
+  color: #fff;
+}
+
+.pos-sticky--x {
+  position: sticky;
+  top: 39.3px;
+  right: 34.67px;
   background: var(--table-head);
   color: #fff;
 }
