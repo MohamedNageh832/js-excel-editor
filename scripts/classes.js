@@ -93,6 +93,7 @@ class Components {
   static input({ type, id, value, className }) {
     const input = document.createElement("input");
     input.type = type ? type : "text";
+    if (type === "text" || !type) input.dir = "auto";
     if (id) input.id = id;
     input.value = value;
     input.className = className;
@@ -273,7 +274,8 @@ class Components {
         });
       });
 
-      Utils.addNumberingCellEvents({ td, index: 0 });
+      // ! number cell index exceeds data cells by one
+      Utils.addNumberingCellEvents({ td, index: i - 1, orientation: "column" });
     });
 
     tableElement.appendChild(tr);
@@ -301,7 +303,7 @@ class Components {
     });
   }
 
-  static cellContextMenu(index) {
+  static cellContextMenu({ index, dataIs, onRemove }) {
     const menu = document.createElement("ul");
     menu.className = "menu cell__context-menu";
 
@@ -316,6 +318,10 @@ class Components {
           });
         },
       },
+      {
+        text: dataIs === "row" ? "حذف الصف" : "حذف العمود",
+        action: () => FormBuilder.confirmDeleteForm({ index, dataIs }),
+      },
     ];
 
     options.forEach((option) => {
@@ -325,6 +331,13 @@ class Components {
       listItem.addEventListener("click", option.action);
       menu.appendChild(listItem);
     });
+
+    const removeEl = () => {
+      menu.remove();
+      onRemove();
+    };
+
+    menu.removeEl = removeEl;
 
     return menu;
   }
@@ -381,6 +394,11 @@ class Components {
       overlay.remove();
     });
     titleEl.textContent = title;
+
+    form.addEventListener("submit", () => {
+      form.remove();
+      overlay.remove();
+    });
 
     form.append(titleEl, formControls);
 
@@ -461,29 +479,43 @@ class Utils {
   static addNumberingCellEvents({ orientation, td, index }) {
     td.addEventListener("contextmenu", (e) => {
       e.preventDefault();
+      e.stopPropagation();
+
+      const onRemove = () => {
+        const highZIndexEls = document.querySelectorAll(".z-100");
+        highZIndexEls.forEach((el) => el.classList.remove("z-100"));
+
+        const selectedColumnCells =
+          document.querySelectorAll(".selected-column");
+
+        selectedColumnCells.forEach((el) =>
+          el.classList.remove("selected-column")
+        );
+
+        const selectedRows = document.querySelectorAll(".selected-row");
+        selectedRows.forEach((el) => el.classList.remove("selected-row"));
+      };
+
+      Utils.closeContextMenus(e);
+
+      const contextmenu = Components.cellContextMenu({
+        index,
+        dataIs: orientation,
+        onRemove,
+      });
 
       if (orientation === "column") {
+        // ! Number cell index exceeds data cells by one so (index + 2) is the real order
         const sameColumnCells = Array.from(
-          document.querySelectorAll(`.table__cell:nth-child(${i + 1})`)
+          document.querySelectorAll(`.table__cell:nth-child(${index + 2})`)
         );
+
+        sameColumnCells.forEach((el) => el.classList.add("selected-column"));
       } else if (orientation === "row") {
-        const parentEl = td.parentElement;
-        if (parentEl.classList.contains("selected")) {
-          parentEl.classList.remove("selected");
-        } else {
-          parentEl.classList.add("selected");
-        }
+        td.parentElement.classList.add("selected-row");
       }
 
-      const openedMenu = document.querySelector(".menu");
-      if (openedMenu) {
-        openedMenu.remove();
-        const selectedRow = document.querySelector(".table__row.selected");
-        if (selectedRow) selectedRow.classList.remove("selected");
-      }
-
-      const contextmenu = Components.cellContextMenu(index);
-
+      td.classList.add("z-100");
       td.appendChild(contextmenu);
     });
   }
@@ -558,10 +590,13 @@ class Utils {
 
     const rows = Array.from(previewTable.children);
 
-    rows.forEach((row) => {
+    rows.slice(1, rows.length).forEach((row, i) => {
       const cells = Array.from(row.children);
 
-      const rowValues = cells.map((cell) => cell.textContent);
+      // Removing vertical number cells
+      const filteredCells = cells.slice(1, cells.length);
+
+      const rowValues = filteredCells.map((cell) => cell.textContent);
 
       values.push(rowValues);
     });
@@ -684,9 +719,10 @@ class Utils {
 
   static addTableCellEvents(td) {
     td.addEventListener("click", () => {
-      const input = document.createElement("input");
-      input.className = "cell__input";
-      input.value = td.textContent;
+      const input = Components.input({
+        className: "cell__input",
+        value: td.textContent,
+      });
 
       td.textContent = "";
       td.appendChild(input);
@@ -706,7 +742,7 @@ class Utils {
     const fileName = "New file.xlsx";
     const sheetName = "1";
     let data = Utils.arrayOf(25, "");
-    data = data.map((_) => Utils.arrayOf(10, ""));
+    data = data.map((_) => Utils.arrayOf(20, ""));
 
     Components.openNewTab(fileName);
 
@@ -718,6 +754,13 @@ class Utils {
     });
 
     FilesManager.openedFiles[fileName] = { [sheetName]: data };
+  }
+
+  static closeContextMenus(e) {
+    if (!e.target.classList.contains("menu")) {
+      const openedMenus = document.querySelectorAll(".menu");
+      if (openedMenus.length > 0) openedMenus.forEach((el) => el.removeEl());
+    }
   }
 }
 
@@ -751,16 +794,12 @@ class FormBuilder {
       const newData = Utils.mergeSimilarColumns(values.filesToMerge, columns);
 
       if (insertInto === "row") {
-        console.log(index);
-
         const { activeFile, activeSheet, openedFiles } = FilesManager;
         openedFiles[activeFile][activeSheet][index] =
           insert === "title" ? newData[0] : newData[1];
 
         const data = openedFiles[activeFile][activeSheet];
         const sheets = Object.keys(openedFiles[activeFile]);
-
-        console.log(data);
 
         Utils.createTable({
           fileName: activeFile,
@@ -769,6 +808,43 @@ class FormBuilder {
           sheets,
         });
       }
+    });
+
+    document.body.append(overlay, form);
+  }
+
+  static confirmDeleteForm({ index, dataIs }) {
+    const { form, formControls, overlay, values } =
+      Components.form("تأكيد الحذف؟");
+
+    const formMessage = document.createElement("span");
+    formMessage.className = "text--secondary";
+    formMessage.textContent = "هل تريد تأكيد حذف البيانات؟";
+
+    form.insertBefore(formMessage, formControls);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const { openedFiles, activeFile, activeSheet } = FilesManager;
+
+      if (dataIs === "row") {
+        openedFiles[activeFile][activeSheet].splice(index, 1);
+      } else if (dataIs === "column") {
+        // const sameColumnCells = Array.from(
+        //   document.querySelectorAll(`.table__cell:nth-child(${index + 1})`)
+        // );
+
+        openedFiles[activeFile][activeSheet].forEach((row) => {
+          row.splice(index, 1);
+        });
+      }
+
+      Utils.createTable({
+        fileName: activeFile,
+        sheetName: activeSheet,
+        data: openedFiles[activeFile][activeSheet],
+      });
     });
 
     document.body.append(overlay, form);
@@ -829,13 +905,5 @@ createNewFileBtn.addEventListener("click", () => {
 
 // =========================================== Window events ============================================= //
 
-window.addEventListener("click", (e) => {
-  if (!e.target.classList.contains("menu")) {
-    const openedMenus = document.querySelectorAll(".menu");
-    if (openedMenus.length > 0) {
-      openedMenus.forEach((el) => el.remove());
-      const selectedRow = document.querySelector(".table__row.selected");
-      if (selectedRow) selectedRow.classList.remove("selected");
-    }
-  }
-});
+window.addEventListener("click", Utils.closeContextMenus);
+window.addEventListener("contextmenu", Utils.closeContextMenus);
