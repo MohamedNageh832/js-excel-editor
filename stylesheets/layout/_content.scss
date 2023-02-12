@@ -10,23 +10,33 @@
 .contents-preview.empty {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   color: var(--secondary);
 }
 
-.contents-preview:not(.empty) .drop-here-img {
+.contents-preview:not(.empty) .contents__drop-file {
   display: none;
 }
 
-.contents-preview.empty::after {
-  content: "اضغط لاختيار ملف او قم بسحب الملف إلي هنا";
-}
-
-.contents-preview.dragover::after {
-  content: "افلت الملف هنا";
+.contents__drop-file {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--s3);
+  border-radius: var(--bRadius1);
+  background-color: var(--bg-1);
 }
 
 .contents-preview.dragover .drop-here-img {
   animation: blink 0.5s linear alternate infinite;
+}
+
+.contents-preview.empty .contents__drop-file::after {
+  content: "اضغط لاختيار ملف او قم بسحب الملف إلي هنا";
+}
+
+.contents-preview.dragover .contents__drop-file::after {
+  content: "افلت الملف هنا";
 }

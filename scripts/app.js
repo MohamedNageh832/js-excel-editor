@@ -1,83 +1,56 @@
-Array.prototype.hasArray = function hasArray(arr) {
-  if (this.length < 1) return false;
+// ================================= Events ======================================= //
 
-  for (let i = 0; i < this.length; i++) {
-    const item = this[i];
+// Contents preview
 
-    if (!Array.isArray(item)) continue;
-
-    if (item.filter((val) => arr.includes(val)).length === arr.length)
-      return true;
-  }
-
-  return false;
-};
-
-const tableHolder = document.querySelector(".table-holder");
+const previewTable = document.querySelector(".table");
 const fileDroppers = document.querySelectorAll(".file_input");
+const tabsNav = document.querySelector(".tabs");
+const pagesNav = document.querySelector(".pages");
+
+fileDroppers.forEach((el) =>
+  el.addEventListener("input", FilesManager.importFile)
+);
 
 const contentsPreview = document.querySelector(".contents-preview");
 
 contentsPreview.addEventListener("dragover", () => {
   if (!hiddenDropBox) return;
-  fileDroppers[1].classList.remove("hidden");
-  contentsPreview.classList.add("dragover");
-  contentsPreview.addEventListener("mouseout", windowMouseUp);
+  Utils.activateFileDropper();
 });
 
-function windowMouseUp() {
-  fileDroppers[1].classList.add("hidden");
-  contentsPreview.classList.remove("dragover");
-  this.removeEventListener("mouseout", windowMouseUp);
-}
+// Taggle borders
 
-let excelData = {};
+const toggleBordersBtn = document.querySelector(".enable-borders-btn");
 
-const mergeBtn = document.querySelector(".merge-btn");
-
-mergeBtn.addEventListener("click", () => {
-  const { currentFile, ...openedFiles } = excelData;
-  const filesToMerge = Object.keys(openedFiles);
-
-  mergeData(filesToMerge, "newFile");
+toggleBordersBtn.addEventListener("click", () => {
+  if (previewTable.classList.contains("borders")) {
+    previewTable.classList.remove("borders");
+    toggleBordersBtn.classList.remove("active");
+  } else {
+    previewTable.classList.add("borders");
+    toggleBordersBtn.classList.add("active");
+  }
 });
 
-const saveBtn = document.querySelector(".save-btn");
+// getTotalValues
+const getTotalBtn = document.querySelector(".get-total-btn");
 
-saveBtn.addEventListener("click", () => {
-  if (Object.keys(excelData).length < 2) return;
-  saveExcelFile(excelData[excelData.currentFile]);
+getTotalBtn.addEventListener("click", () => {
+  const { openedFiles } = FilesManager;
+  const noFilesOpened = Object.keys(openedFiles).length < 1;
+
+  if (noFilesOpened) return;
+  FormBuilder.createFindtotalForm();
 });
 
-// =================================== Functions ==============================//
+// Create new file
+const createNewFileBtn = document.querySelector(".tabs__create-new");
 
-// TODO: Add to class
+createNewFileBtn.addEventListener("click", () => {
+  Utils.createNewFile();
+});
 
-function mergeData(fileNamesArray = [], newFileName) {
-  if (fileNamesArray.length < 2) return;
+// =========================================== Window events ============================================= //
 
-  if (!newFileName.includes(".xlsx")) newFileName = `${newFileName}.xlsx`;
-  const result = [];
-
-  fileNamesArray.forEach((file) => {
-    if (!excelData[file]) throw Error("Failed to merge");
-
-    excelData[file].forEach((row) => {
-      // console.log(result, row);
-
-      // console.log(result.hasArray(row));
-      if (result.hasArray(row)) return;
-
-      result.push(row);
-    });
-  });
-
-  excelData.currentFile = newFileName;
-  excelData[newFileName] = result;
-
-  openNewTab(newFileName);
-  addPagesNav(Object.keys(excelData[excelData.currentFile]));
-  createTable(newFileName, result);
-}
-
-// ! BUG: Values are doubled
+window.addEventListener("click", Utils.closeContextMenus);
+window.addEventListener("contextmenu", Utils.closeContextMenus);

@@ -55,16 +55,6 @@
 
       <section class="content">
         <main class="widget contents-preview empty">
-          <img
-            class="drop-here-img"
-            src="./assets/svg/download_icon.svg"
-            alt="Drop here"
-          />
-          <input
-            class="form-file__input file_input"
-            type="file"
-            multiple="multiple"
-          />
           <nav class="tabs">
             <button class="tabs__create-new">
               <!-- ! TODO <img src="./assets/svg/" alt=""> -->
@@ -75,11 +65,27 @@
             <table class="table"></table>
           </section>
           <nav class="pages"></nav>
+          <section class="contents__drop-file">
+            <img
+              class="drop-here-img"
+              src="./assets/svg/download_icon.svg"
+              alt="Drop here"
+            />
+            <input
+              class="form-file__input file_input"
+              type="file"
+              multiple="multiple"
+            />
+          </section>
         </main>
       </section>
     </div>
 
     <script src="./scripts/xlsx.full.min.js"></script>
-    <script src="./scripts/classes.js"></script>
+    <script src="./scripts/filesManager.js"></script>
+    <script src="./scripts/components.js"></script>
+    <script src="./scripts/utils.js"></script>
+    <script src="./scripts/formBuilder.js"></script>
+    <script src="./scripts/app.js"></script>
   </body>
 </html>
