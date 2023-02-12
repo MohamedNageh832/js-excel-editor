@@ -209,7 +209,8 @@ class Components {
           className: "table__cell",
           value: cell,
         });
-        if (i !== 0) Utils.addTableCellEvents(td);
+
+        Utils.addTableCellEvents(td);
         tr.appendChild(td);
       });
 

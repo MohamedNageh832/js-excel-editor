@@ -211,7 +211,7 @@ class Utils {
     // return fileNames.reduce((prev, currFile) => {
     //   return this.getTotalValues(prev, columns, currFile);
     // }, intialValues);
-    const rowsToSkip = [52, 53, 54];
+    const rowsToSkip = [];
 
     fileNames.forEach((fileName) => {
       const { openedFiles } = FilesManager;
@@ -223,7 +223,13 @@ class Utils {
         const indexes = Utils.getIndexes(columns, sheetData[1]); // TODO: SHEET ROW IS TO BE DYNAMIC
 
         result = sheetData.reduce((prev, currRow, i) => {
-          if (rowsToSkip.includes(i)) return prev;
+          const isTotalValuesRow = currRow.some(
+            (cell) =>
+              Utils.formatString(cell) === Utils.formatString("الاجمالي")
+          );
+
+          if (rowsToSkip.includes(i) || isTotalValuesRow) return prev;
+
           currRow.forEach((el, k) => {
             if (indexes[k] === -1 || isNaN(+el)) return;
             prev[1][indexes[k]] += +el;
@@ -378,5 +384,17 @@ class Utils {
       sheetName: activeSheet,
       data: openedFiles[activeFile][activeSheet],
     });
+  }
+
+  static formatString(string) {
+    if (!string) return "";
+
+    return string
+      .toString()
+      .replaceAll(/(أ|إ|آ)/gi, "ا")
+      .replaceAll(/(ة)/gi, "ه")
+      .replaceAll(/(ى)/gi, "ي")
+      .replaceAll(/(ـ)/gi, "")
+      .trim();
   }
 }
