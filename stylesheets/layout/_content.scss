@@ -17,7 +17,7 @@
 
 .file-dropper {
   position: relative;
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -30,15 +30,15 @@
   color: var(--secondary);
 }
 
-.contents-preview.empty .file-dropper,
-.contents-preview.dragover .file-dropper {
-  display: flex;
+.contents-preview:not(.empty) .file-dropper {
+  display: none;
 }
 
 .contents-preview.dragover .file-dropper {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   z-index: 9;
   background-color: rgba(255, 255, 255, 0.8);
 }

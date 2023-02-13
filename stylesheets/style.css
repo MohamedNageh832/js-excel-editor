@@ -164,9 +164,9 @@ ul {
 
 .tabs {
   display: flex;
+  align-items: center;
   gap: var(--s3);
-  padding: 0 var(--s2) var(--s2);
-  margin-bottom: var(--s2);
+  padding: 0 var(--s2) var(--s3);
 }
 
 .tabs__create-new {
@@ -174,8 +174,8 @@ ul {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   padding-left: 2px;
   padding-bottom: 3px;
   background-color: inherit;
@@ -200,10 +200,13 @@ ul {
 
 .tabs__btn {
   position: relative;
+  max-width: 300px;
   border-bottom: 2px solid transparent;
   color: var(--secondary);
   background-color: inherit;
   font-size: var(--fs2);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .tabs__btn.active {
@@ -730,7 +733,7 @@ ul {
 
 .file-dropper {
   position: relative;
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -743,15 +746,15 @@ ul {
   color: var(--secondary);
 }
 
-.contents-preview.empty .file-dropper,
-.contents-preview.dragover .file-dropper {
-  display: flex;
+.contents-preview:not(.empty) .file-dropper {
+  display: none;
 }
 
 .contents-preview.dragover .file-dropper {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   z-index: 9;
   background-color: rgba(255, 255, 255, 0.8);
 }
