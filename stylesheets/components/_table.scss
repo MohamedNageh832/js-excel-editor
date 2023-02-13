@@ -1,11 +1,13 @@
-.contents-preview.empty .table-holder,
+.contents-preview.empty .table,
 .contents-preview.empty .pages {
-  display: none;
+  height: 0;
+  overflow: hidden;
+  padding: 0;
 }
 
 .table-holder {
   overflow: auto;
-  height: calc(100% - 95px);
+  height: 100%;
   background-color: #fff;
 }
 
@@ -66,7 +68,7 @@
   border-bottom: 2px solid transparent;
   color: var(--secondary);
   background-color: inherit;
-  font-size: 16px;
+  font-size: var(--fs2);
 }
 
 .tabs__btn.active {
@@ -270,12 +272,13 @@
   display: flex;
   gap: var(--s3);
   overflow: auto;
-  padding: var(--s3);
+  padding: var(--s3) var(--s3) 0;
   background-color: var(--bg-2);
 }
 
 .pages__btn {
   font-size: var(--fs1);
+  white-space: nowrap;
 }
 
 .pages__btn.active {

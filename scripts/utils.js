@@ -13,13 +13,11 @@ class Utils {
   }
 
   static activateFileDropper() {
-    fileDroppers[1].classList.remove("hidden");
     contentsPreview.classList.add("dragover");
     contentsPreview.addEventListener("mouseout", Utils.windowMouseUp);
   }
 
   static windowMouseUp() {
-    fileDroppers[1].classList.add("hidden");
     contentsPreview.classList.remove("dragover");
     this.removeEventListener("mouseout", Utils.windowMouseUp);
   }

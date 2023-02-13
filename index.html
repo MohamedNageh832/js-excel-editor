@@ -29,12 +29,8 @@
         <h4>محرر <span class="c-blue">Excel</span></h4>
 
         <section class="flex gap-3">
-          <div class="form-file">
-            <input
-              class="form-file__input file_input"
-              type="file"
-              multiple="multiple"
-            />
+          <div class="pos-relative">
+            <input class="form__file" type="file" multiple="multiple" />
             <button class="btn btn--primary" id="test">
               <img
                 class="icon"
@@ -63,20 +59,16 @@
           </nav>
           <section class="table-holder">
             <table class="table"></table>
+            <section class="file-dropper">
+              <img
+                class="drop-here-img"
+                src="./assets/svg/download_icon.svg"
+                alt="Drop here"
+              />
+              <input class="form__file" type="file" multiple="multiple" />
+            </section>
           </section>
           <nav class="pages"></nav>
-          <section class="contents__drop-file">
-            <img
-              class="drop-here-img"
-              src="./assets/svg/download_icon.svg"
-              alt="Drop here"
-            />
-            <input
-              class="form-file__input file_input"
-              type="file"
-              multiple="multiple"
-            />
-          </section>
         </main>
       </section>
     </div>

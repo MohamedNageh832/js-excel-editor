@@ -10,6 +10,9 @@
   .mt-#{$i} {
     margin-top: var(--s#{$i});
   }
+  .fs-#{$i} {
+    font-size: var(--fs#{$i});
+  }
 }
 
 .c-blue {
@@ -23,6 +26,10 @@
 .icon {
   width: 24px;
   height: 24px;
+}
+
+.pos-relative {
+  position: relative;
 }
 
 .pos-sticky {
@@ -48,4 +55,18 @@
 
 .z-100 {
   z-index: 100;
+}
+
+.svg {
+  width: 24px;
+  height: 24px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex--center {
+  justify-content: center;
+  align-items: center;
 }

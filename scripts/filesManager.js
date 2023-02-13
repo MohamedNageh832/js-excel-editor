@@ -5,26 +5,48 @@ class FilesManager {
   static activeSheet = null;
   static openedFiles = {};
 
-  static importFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  static async importFiles({ evt, filesToImport, preview }) {
+    const files = evt ? evt.target.files : filesToImport;
 
-    let fileName = file.name;
-    if (!file) throw Error("Failed to load the file");
+    if (files.length < 1) throw Error("Failed to load files");
 
-    if (FilesManager.activeFile === fileName)
-      fileName = generateUniqueName(fileName);
+    await FilesManager.readMultipleFiles(files);
 
-    FilesManager.activeFile = fileName;
-    FilesManager.openedFiles[fileName] = {};
+    if (!preview) return;
+    const lastFileImported = Array.from(files).at(-1);
+    if (FilesManager.activeFile === lastFileImported.name)
+      lastFileImported.name = generateUniqueName(lastFileImported.name);
 
-    const reader = new FileReader();
-    reader.readAsBinaryString(file);
+    FilesManager.activeFile = lastFileImported.name;
 
-    reader.addEventListener("load", (e) => {
-      const contents = FilesManager.processExcel(e.target.result);
-      Object.assign(FilesManager.openedFiles[fileName], { ...contents });
-      FilesManager.previewFile(contents);
+    FilesManager.previewFile(FilesManager.openedFiles[lastFileImported.name]);
+  }
+
+  static readMultipleFiles(files) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      function readFile(index) {
+        if (index >= files.length) resolve();
+
+        let file = files[index];
+        reader.onload = (e) => {
+          try {
+            const contents = FilesManager.processExcel(e.target.result);
+            FilesManager.openedFiles[file.name] = {};
+
+            Object.assign(FilesManager.openedFiles[file.name], contents);
+
+            readFile(index + 1);
+          } catch (err) {
+            reject(err);
+          }
+        };
+
+        reader.readAsBinaryString(file);
+      }
+
+      readFile(0);
     });
   }
 
@@ -34,7 +56,7 @@ class FilesManager {
     });
 
     let firstSheet = workbook.SheetNames[0];
-    let contents = this.to_json(workbook);
+    let contents = FilesManager.to_json(workbook);
 
     return contents;
   }

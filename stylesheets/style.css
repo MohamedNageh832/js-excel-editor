@@ -100,6 +100,7 @@ body {
 button {
   border: none;
   cursor: pointer;
+  background-color: inherit;
 }
 
 input {
@@ -136,24 +137,17 @@ ul {
   background-color: var(--bg-2);
 }
 
-.contents-preview.empty .table-holder,
+.contents-preview.empty .table,
 .contents-preview.empty .pages {
-  display: none;
+  height: 0;
+  overflow: hidden;
+  padding: 0;
 }
 
 .table-holder {
   overflow: auto;
-  height: calc(100% - 95px);
+  height: 100%;
   background-color: #fff;
-}
-
-@-webkit-keyframes blink {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.1;
-  }
 }
 
 @keyframes blink {
@@ -209,7 +203,7 @@ ul {
   border-bottom: 2px solid transparent;
   color: var(--secondary);
   background-color: inherit;
-  font-size: 16px;
+  font-size: var(--fs2);
 }
 
 .tabs__btn.active {
@@ -241,17 +235,7 @@ ul {
 }
 
 .contents-preview:not(.empty) .table {
-  -webkit-animation: tableAnimation 0.81s ease-in-out forwards;
-          animation: tableAnimation 0.81s ease-in-out forwards;
-}
-
-@-webkit-keyframes tableAnimation {
-  0% {
-    border-spacing: 230px;
-  }
-  100% {
-    border-spacing: 0;
-  }
+  animation: tableAnimation 0.81s ease-in-out forwards;
 }
 
 @keyframes tableAnimation {
@@ -294,7 +278,6 @@ ul {
 }
 
 .table__numbering {
-  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 9;
@@ -316,7 +299,6 @@ ul {
 }
 
 .table__number {
-  position: -webkit-sticky;
   position: sticky;
   right: 0;
   width: 40px;
@@ -417,18 +399,18 @@ ul {
 }
 
 .pages {
-  position: -webkit-sticky;
   position: sticky;
   bottom: 0;
   display: flex;
   gap: var(--s3);
   overflow: auto;
-  padding: var(--s3);
+  padding: var(--s3) var(--s3) 0;
   background-color: var(--bg-2);
 }
 
 .pages__btn {
   font-size: var(--fs1);
+  white-space: nowrap;
 }
 
 .pages__btn.active {
@@ -462,11 +444,7 @@ ul {
   color: var(--blue);
 }
 
-.form-file {
-  position: relative;
-}
-
-.form-file__input {
+.form__file {
   position: absolute;
   top: 0;
   left: 0;
@@ -477,7 +455,7 @@ ul {
   cursor: pointer;
 }
 
-.form-file__input:hover + .btn {
+.form__file:hover + .btn {
   background-color: var(--blueHover);
 }
 
@@ -520,20 +498,7 @@ ul {
 
 .preloader__line {
   stroke-dasharray: 600;
-  -webkit-animation: draw 4s ease-in-out infinite;
-          animation: draw 4s ease-in-out infinite;
-}
-
-@-webkit-keyframes draw {
-  0% {
-    stroke-dashoffset: 600;
-  }
-  50% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -600;
-  }
+  animation: draw 4s ease-in-out infinite;
 }
 
 @keyframes draw {
@@ -560,12 +525,49 @@ ul {
   flex-direction: column;
   gap: var(--s3);
   z-index: 12;
+  overflow: auto;
   min-width: 300px;
   max-width: 95%;
+  max-height: 90vh;
   padding: var(--s3);
   transform: translate(-50%, -50%);
   border-radius: var(--bRadius1);
   background-color: var(--bg-2);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  overflow: auto;
+  height: 100%;
+}
+
+.list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  padding: var(--s2);
+  border-radius: var(--bRadius1);
+  background-color: var(--bg-2);
+}
+
+.list__delete {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.3;
+  transition: all 0.05s ease-in-out;
+}
+
+.list__delete .svg {
+  width: 20px;
+  height: 20px;
+}
+
+.list__delete:hover {
+  opacity: 0.8;
+  background-color: var(--bg-1);
 }
 
 .flex {
@@ -580,12 +582,20 @@ ul {
   margin-top: var(--s1);
 }
 
+.fs-1 {
+  font-size: var(--fs1);
+}
+
 .gap-2 {
   gap: var(--s2);
 }
 
 .mt-2 {
   margin-top: var(--s2);
+}
+
+.fs-2 {
+  font-size: var(--fs2);
 }
 
 .gap-3 {
@@ -596,12 +606,20 @@ ul {
   margin-top: var(--s3);
 }
 
+.fs-3 {
+  font-size: var(--fs3);
+}
+
 .gap-4 {
   gap: var(--s4);
 }
 
 .mt-4 {
   margin-top: var(--s4);
+}
+
+.fs-4 {
+  font-size: var(--fs4);
 }
 
 .gap-5 {
@@ -612,12 +630,20 @@ ul {
   margin-top: var(--s5);
 }
 
+.fs-5 {
+  font-size: var(--fs5);
+}
+
 .gap-6 {
   gap: var(--s6);
 }
 
 .mt-6 {
   margin-top: var(--s6);
+}
+
+.fs-6 {
+  font-size: var(--fs6);
 }
 
 .c-blue {
@@ -633,8 +659,11 @@ ul {
   height: 24px;
 }
 
+.pos-relative {
+  position: relative;
+}
+
 .pos-sticky {
-  position: -webkit-sticky;
   position: sticky;
   top: 25px;
   background: var(--table-head);
@@ -643,7 +672,6 @@ ul {
 }
 
 .pos-sticky--x {
-  position: -webkit-sticky;
   position: sticky;
   top: 25px;
   right: 32.35px;
@@ -658,6 +686,20 @@ ul {
 
 .z-100 {
   z-index: 100;
+}
+
+.svg {
+  width: 24px;
+  height: 24px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex--center {
+  justify-content: center;
+  align-items: center;
 }
 
 .navbar {
@@ -675,6 +717,8 @@ ul {
 
 .contents-preview {
   position: relative;
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - 156px);
 }
 
@@ -684,33 +728,60 @@ ul {
   color: var(--secondary);
 }
 
-.contents-preview:not(.empty) .contents__drop-file {
+.file-dropper {
+  position: relative;
   display: none;
-}
-
-.contents__drop-file {
-  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: var(--s2);
   width: 100%;
   height: 100%;
   padding: var(--s3);
   border-radius: var(--bRadius1);
   background-color: var(--bg-1);
+  color: var(--secondary);
 }
 
-.contents-preview.dragover .drop-here-img {
-  -webkit-animation: blink 0.5s linear alternate infinite;
-          animation: blink 0.5s linear alternate infinite;
+.contents-preview.empty .file-dropper,
+.contents-preview.dragover .file-dropper {
+  display: flex;
 }
 
-.contents-preview.empty .contents__drop-file::after {
-  content: "اضغط لاختيار ملف او قم بسحب الملف إلي هنا";
+.contents-preview.dragover .file-dropper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9;
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
-.contents-preview.dragover .contents__drop-file::after {
-  content: "افلت الملف هنا";
+.file-dropper.has-files {
+  justify-content: flex-start;
+  max-height: 60vh;
+}
+
+.dragover .drop-here-img {
+  animation: blink 0.5s linear alternate infinite;
+}
+
+.dragover .form__file {
+  height: 100%;
+}
+
+.file-dropper.has-files .form__file {
+  top: auto;
+  bottom: 0;
+  height: 95px;
+}
+
+.file-dropper::after,
+.contents-preview.empty .file-dropper::after {
+  content: "اضغط لاختيار الملفات او قم بسحبها إلي هنا";
+}
+
+.contents-preview.dragover .file-dropper::after {
+  content: "افلت هنا";
 }
 
 /* Components */

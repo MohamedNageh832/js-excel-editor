@@ -12,13 +12,21 @@ class Components {
     return button;
   }
 
-  static input({ type, id, value, className }) {
+  static input(props) {
+    const { type, ...otherProps } = props || {};
+
     const input = document.createElement("input");
+
     input.type = type ? type : "text";
     if (type === "text" || !type) input.dir = "auto";
-    if (id) input.id = id;
-    input.value = value;
-    input.className = className;
+
+    const propsToAdd = Object.keys(otherProps);
+
+    // if (id) input.id = id;
+    // if (value) input.value = value;
+    // input.className = className;
+
+    propsToAdd.forEach((prop) => (input[prop] = otherProps[prop]));
 
     return input;
   }
@@ -355,5 +363,72 @@ class Components {
     holder.className = "flex gap-3";
     holder.append(submitBtn, closeBtn);
     return holder;
+  }
+
+  static fileDropper() {
+    const holder = document.createElement("section");
+    const list = Components.list();
+    const icon = document.createElement("img");
+    const input = Components.input({
+      type: "file",
+      className: "form__file",
+      multiple: true,
+    });
+
+    icon.src = "./assets/svg/download_icon.svg";
+
+    icon.className = "drop-here-img";
+    holder.className = "file-dropper fs-2";
+    holder.append(list, icon, input);
+
+    return holder;
+  }
+
+  static list(inputEl, items) {
+    const list = document.createElement("ul");
+    list.className = "list";
+
+    if (items) {
+      items.forEach((item, i) => {
+        const listItem = Components.listItem(inputEl, item, i);
+
+        list.appendChild(listItem);
+      });
+    }
+
+    return list;
+  }
+
+  static listItem(inputEl, value) {
+    const listItem = document.createElement("li");
+    const closeIcon = document.createElement("img");
+    const deleteBtn = Components.button({
+      className: "flex flex--center list__delete",
+    });
+    const span = document.createElement("span");
+
+    closeIcon.className = "svg";
+    closeIcon.src = "./assets/svg/close_icon.svg";
+    deleteBtn.appendChild(closeIcon);
+
+    deleteBtn.addEventListener("click", () => {
+      const dt = new DataTransfer();
+
+      for (let file of inputEl.files) {
+        if (file.name !== value) dt.items.add(file);
+      }
+
+      if (dt.files.length < 1)
+        inputEl.parentElement.classList.remove("has-files");
+
+      inputEl.files = dt.files;
+      listItem.remove();
+    });
+
+    span.textContent = value;
+
+    listItem.className = "list__item";
+    listItem.append(deleteBtn, span);
+    return listItem;
   }
 }

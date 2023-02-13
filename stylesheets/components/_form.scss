@@ -1,8 +1,4 @@
-.form-file {
-  position: relative;
-}
-
-.form-file__input {
+.form__file {
   position: absolute;
   top: 0;
   left: 0;
@@ -13,7 +9,7 @@
   cursor: pointer;
 }
 
-.form-file__input:hover + .btn {
+.form__file:hover + .btn {
   background-color: var(--blueHover);
 }
 

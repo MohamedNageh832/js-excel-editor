@@ -4,6 +4,8 @@
 
 .contents-preview {
   position: relative;
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - 156px);
 }
 
@@ -13,30 +15,58 @@
   color: var(--secondary);
 }
 
-.contents-preview:not(.empty) .contents__drop-file {
+.file-dropper {
+  position: relative;
   display: none;
-}
-
-.contents__drop-file {
-  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: var(--s2);
   width: 100%;
   height: 100%;
   padding: var(--s3);
   border-radius: var(--bRadius1);
   background-color: var(--bg-1);
+  color: var(--secondary);
 }
 
-.contents-preview.dragover .drop-here-img {
+.contents-preview.empty .file-dropper,
+.contents-preview.dragover .file-dropper {
+  display: flex;
+}
+
+.contents-preview.dragover .file-dropper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.file-dropper.has-files {
+  justify-content: flex-start;
+  max-height: 60vh;
+}
+
+.dragover .drop-here-img {
   animation: blink 0.5s linear alternate infinite;
 }
 
-.contents-preview.empty .contents__drop-file::after {
-  content: "اضغط لاختيار ملف او قم بسحب الملف إلي هنا";
+.dragover .form__file {
+  height: 100%;
 }
 
-.contents-preview.dragover .contents__drop-file::after {
-  content: "افلت الملف هنا";
+.file-dropper.has-files .form__file {
+  top: auto;
+  bottom: 0;
+  height: 95px;
+}
+
+.file-dropper::after,
+.contents-preview.empty .file-dropper::after {
+  content: "اضغط لاختيار الملفات او قم بسحبها إلي هنا";
+}
+
+.contents-preview.dragover .file-dropper::after {
+  content: "افلت هنا";
 }

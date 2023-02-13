@@ -3,20 +3,19 @@
 // Contents preview
 
 const previewTable = document.querySelector(".table");
-const fileDroppers = document.querySelectorAll(".file_input");
+const fileDroppers = document.querySelectorAll(".form__file");
 const tabsNav = document.querySelector(".tabs");
 const pagesNav = document.querySelector(".pages");
 
 fileDroppers.forEach((el) =>
-  el.addEventListener("input", FilesManager.importFile)
+  el.addEventListener("input", (evt) =>
+    FilesManager.importFiles({ evt, preview: true })
+  )
 );
 
 const contentsPreview = document.querySelector(".contents-preview");
 
-contentsPreview.addEventListener("dragover", () => {
-  if (!hiddenDropBox) return;
-  Utils.activateFileDropper();
-});
+contentsPreview.addEventListener("dragover", () => Utils.activateFileDropper());
 
 // Taggle borders
 

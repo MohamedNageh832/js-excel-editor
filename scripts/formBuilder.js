@@ -22,10 +22,40 @@ class FormBuilder {
       form.insertBefore(checkbox, formControls);
     });
 
-    form.addEventListener("submit", (e) => {
+    const fileDropper = Components.fileDropper();
+
+    fileDropper.addEventListener("change", (e) => {
+      const { files } = e.target;
+
+      const fileNames = Array.from(files).map((file) => file.name);
+
+      if (fileNames.length > 0) fileDropper.classList.add("has-files");
+      else fileDropper.classList.remove("has-files");
+
+      const list = fileDropper.querySelector(".list");
+
+      fileNames.forEach((file) => {
+        const listItem = Components.listItem(e.target, file);
+        list.appendChild(listItem);
+      });
+
+      fileDropper.prepend(list);
+
+      values.filesToMerge = files;
+    });
+
+    form.insertBefore(fileDropper, formControls);
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const columns = Utils.checkAvailableColumns(values.filesToMerge, [0]);
-      const newData = Utils.mergeSimilarColumns(values.filesToMerge, columns);
+      await FilesManager.importFiles({ filesToImport: values.filesToMerge });
+
+      const fileNames = Array.from(values.filesToMerge).map(
+        (file) => file.name
+      );
+
+      const columns = Utils.checkAvailableColumns(fileNames, [0]);
+      const newData = Utils.mergeSimilarColumns(fileNames, columns);
 
       if (insertInto === "row") {
         const { activeFile, activeSheet, openedFiles } = FilesManager;
@@ -41,6 +71,8 @@ class FormBuilder {
           data,
           sheets,
         });
+      } else if (insertInto === "column") {
+        console.log("this feature isn't implemented yet!");
       }
     });
 
