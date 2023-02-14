@@ -447,6 +447,12 @@ ul {
   color: var(--blue);
 }
 
+.form__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
 .form__file {
   position: absolute;
   top: 0;
@@ -462,6 +468,28 @@ ul {
   background-color: var(--blueHover);
 }
 
+.form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.form__group--wrapper {
+  overflow: auto;
+  max-height: 250px;
+  border-radius: var(--bRadius1);
+  background-color: var(--bg-1);
+}
+
+.form__group--wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  padding: var(--s3);
+  border-radius: var(--bRadius1);
+  background: var(--bg-1);
+}
+
 .form__checkbox {
   display: flex;
   align-items: center;
@@ -469,9 +497,29 @@ ul {
   font-size: var(--fs2);
 }
 
+.form__checkbox--inline {
+  padding: var(--s2) var(--s3);
+  background: var(--bg-2);
+  border-radius: 25px;
+}
+
 .checkbox__input {
   width: 16px;
   height: 16px;
+}
+
+.form__label {
+  display: block;
+  font-size: var(--fs2);
+  color: var(--secondary);
+  margin-bottom: var(--s2);
+}
+
+.form__select {
+  width: 100%;
+  padding: var(--s1) var(--s2);
+  border: 1px solid var(--borderColor);
+  border-radius: var(--bRadius1);
 }
 
 .overlay {
@@ -543,6 +591,7 @@ ul {
   flex-direction: column;
   gap: var(--s2);
   overflow: auto;
+  width: 100%;
   height: 100%;
 }
 
@@ -761,7 +810,7 @@ ul {
 
 .file-dropper.has-files {
   justify-content: flex-start;
-  max-height: 60vh;
+  max-height: 50vh;
 }
 
 .dragover .drop-here-img {

@@ -323,6 +323,7 @@ class Components {
     const form = document.createElement("form");
     const overlay = document.createElement("div");
     const titleEl = document.createElement("h3");
+    const formBody = document.createElement("section");
     const formControls = this.formControls(form, overlay);
     const values = {};
 
@@ -333,15 +334,16 @@ class Components {
       overlay.remove();
     });
     titleEl.textContent = title;
+    formBody.className = "form__body";
 
     form.addEventListener("submit", () => {
       form.remove();
       overlay.remove();
     });
 
-    form.append(titleEl, formControls);
+    form.append(titleEl, formBody, formControls);
 
-    return { form, values, overlay, formControls };
+    return { form, values, overlay, formBody };
   }
 
   static formControls(form, overlay) {
@@ -363,6 +365,13 @@ class Components {
     holder.className = "flex gap-3";
     holder.append(submitBtn, closeBtn);
     return holder;
+  }
+
+  static formGroup() {
+    const formGroup = document.createElement("section");
+    formGroup.className = "form__group";
+
+    return formGroup;
   }
 
   static fileDropper() {
@@ -430,5 +439,34 @@ class Components {
     listItem.className = "list__item";
     listItem.append(deleteBtn, span);
     return listItem;
+  }
+
+  static label(value) {
+    const labelEl = document.createElement("label");
+    labelEl.className = "form__label";
+    labelEl.textContent = value;
+
+    return labelEl;
+  }
+
+  static select({ label, data }) {
+    const holder = document.createElement("section");
+    const labelEl = Components.label(label);
+    const selectBox = document.createElement("select");
+
+    selectBox.className = "form__select";
+
+    data.forEach((val) => {
+      const option = document.createElement("option");
+
+      option.value = val;
+      option.textContent = val;
+
+      selectBox.appendChild(option);
+    });
+
+    holder.append(labelEl, selectBox);
+
+    return holder;
   }
 }
