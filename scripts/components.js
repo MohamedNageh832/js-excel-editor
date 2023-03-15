@@ -32,9 +32,9 @@ class Components {
   }
 
   static checkbox(label, callback) {
-    const holder = document.createElement("section");
+    const checkbox = document.createElement("section");
     const labelEL = document.createElement("label");
-    const checkbox = Components.input({
+    const checkboxInput = Components.input({
       type: "checkbox",
       id: label,
       value: label,
@@ -46,10 +46,10 @@ class Components {
     labelEL.textContent = label;
     labelEL.setAttribute("for", label);
 
-    holder.className = "form__checkbox";
-    holder.append(checkbox, labelEL);
+    checkbox.className = "form__checkbox";
+    checkbox.append(checkboxInput, labelEL);
 
-    return holder;
+    return { checkbox, checkboxInput };
   }
 
   static closeTabBtn(title) {
@@ -130,10 +130,13 @@ class Components {
     return tr;
   }
 
-  static tableCell({ value, className }) {
+  static tableCell({ value, className, rowIndex, columnIndex }) {
     const td = document.createElement("td");
 
     td.className = className ? className : "";
+    td.draggable = true;
+    td.dataset.rowIndex = rowIndex;
+    td.dataset.columnIndex = columnIndex;
     td.textContent = value || "";
 
     return td;
@@ -145,29 +148,29 @@ class Components {
     if (className) td.className = className;
     const inHead = rowIndex === 0;
 
-    if (!inHead) {
-      //   const img = document.createElement("img");
+    //   const img = document.createElement("img");
 
-      //   img.src = "./assets/svg/drag_indicator_icon.svg";
-      //   img.className = "table__row-options";
+    //   img.src = "./assets/svg/drag_indicator_icon.svg";
+    //   img.className = "table__row-options";
 
-      Utils.addNumberingCellEvents({ orientation: "row", td, index: rowIndex });
+    Utils.addNumberingCellEvents({ orientation: "row", td, index: rowIndex });
 
-      td.addEventListener("dblclick", () => {
-        if (tr.classList.contains("pos-sticky"))
-          tr.classList.remove("pos-sticky");
-        else tr.classList.add("pos-sticky");
-      });
+    td.addEventListener("dblclick", () => {
+      if (tr.classList.contains("pos-sticky"))
+        tr.classList.remove("pos-sticky");
+      else tr.classList.add("pos-sticky");
+    });
 
-      //   td.appendChild(img);
-    }
+    //   td.appendChild(img);
+    td.draggable = true;
+    td.dataset.rowIndex = rowIndex;
 
     return td;
   }
 
   static tableBody(tableElement, data) {
     if (!tableElement)
-      throw Error("Cannot add to tableElement = " + tableElement);
+      throw Error("Cannot append to tableElement = " + tableElement);
 
     tableElement.textContent = "";
 
@@ -177,11 +180,13 @@ class Components {
       const td = Components.tableCell({
         value: i !== 0 ? i : "",
         className: "table__number",
+        columnIndex: i,
       });
 
       tr.appendChild(td);
 
       if (i === 0) return;
+
       td.addEventListener("dblclick", () => {
         const sameColumnCells = Array.from(
           document.querySelectorAll(`.table__cell:nth-child(${i + 1})`)
@@ -204,7 +209,7 @@ class Components {
         });
       });
 
-      // ! number cell index exceeds data cells by one
+      // ! number cell index exceeds data cells by one (because of ordering cells)
       Utils.addNumberingCellEvents({ td, index: i - 1, orientation: "column" });
     });
 
@@ -212,13 +217,19 @@ class Components {
     data.forEach((row, i) => {
       const tr = Components.tableRow({ head: i === 0 });
 
-      row.forEach((cell) => {
+      row.forEach((cell, columnIndex) => {
         const td = Components.tableCell({
           className: "table__cell",
           value: cell,
+          rowIndex: i,
+          columnIndex,
         });
 
-        Utils.addTableCellEvents(td);
+        Utils.addTableCellEvents({
+          td,
+          columnIndex,
+          rowIndex: i,
+        });
         tr.appendChild(td);
       });
 
@@ -234,7 +245,7 @@ class Components {
     });
   }
 
-  static cellContextMenu({ index, dataIs, onRemove }) {
+  static orderingCellContextMenu({ index, dataIs, onRemove }) {
     const menu = document.createElement("ul");
     menu.className = "menu cell__context-menu";
 
@@ -260,6 +271,39 @@ class Components {
       {
         text: dataIs === "row" ? "اضافة صف بعد" : "اضافة عمود بعد",
         action: () => Utils.addAfter({ index, dataIs }),
+      },
+    ];
+
+    options.forEach((option) => {
+      const listItem = document.createElement("li");
+      listItem.className = "context-menu__option";
+      listItem.textContent = option.text;
+      listItem.addEventListener("click", option.action);
+      menu.appendChild(listItem);
+    });
+
+    const removeEl = () => {
+      menu.remove();
+      onRemove();
+    };
+
+    menu.removeEl = removeEl;
+
+    return menu;
+  }
+
+  static cellContextMenu({ index, onRemove, rowIndex, columnIndex }) {
+    const menu = document.createElement("ul");
+    menu.className = "menu cell__context-menu";
+
+    const options = [
+      {
+        text: "ازاحة لليمين",
+        action: () => Utils.moveRight({ index, rowIndex, columnIndex }),
+      },
+      {
+        text: "ازاحة لليسار",
+        action: () => Utils.moveLeft({ index, rowIndex, columnIndex }),
       },
     ];
 
@@ -325,6 +369,7 @@ class Components {
     const titleEl = document.createElement("h3");
     const formBody = document.createElement("section");
     const formControls = this.formControls(form, overlay);
+    const formError = document.createElement("span");
     const values = {};
 
     form.className = "modal";
@@ -336,14 +381,12 @@ class Components {
     titleEl.textContent = title;
     formBody.className = "form__body";
 
-    form.addEventListener("submit", () => {
-      form.remove();
-      overlay.remove();
-    });
+    formError.className = "form__error";
+    formBody.append(formError);
 
-    form.append(titleEl, formBody, formControls);
+    form.append(titleEl, formBody, formError, formControls);
 
-    return { form, values, overlay, formBody };
+    return { form, values, formError, overlay, formBody };
   }
 
   static formControls(form, overlay) {

@@ -73,3 +73,12 @@
   border: 1px solid var(--borderColor);
   border-radius: var(--bRadius1);
 }
+
+.form__error {
+  color: var(--red);
+  font-size: var(--fs2);
+}
+
+.form__error:empty {
+  display: none;
+}

@@ -30,11 +30,11 @@
   color: var(--secondary);
 }
 
-.contents-preview:not(.empty) .file-dropper {
+.table:not(:empty) + .file-dropper {
   display: none;
 }
 
-.contents-preview.dragover .file-dropper {
+.table:empty .file-dropper {
   position: absolute;
   top: 0;
   left: 0;

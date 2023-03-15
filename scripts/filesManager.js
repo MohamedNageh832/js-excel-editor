@@ -90,10 +90,15 @@ class FilesManager {
   }
 
   static saveExcelFile(data) {
-    const ws = XLSX.utils.json_to_sheet(data, { skipHeader: 1 });
+    const sheets = Object.keys(data);
     const wb = XLSX.utils.book_new();
 
-    XLSX.utils.book_append_sheet(wb, ws, this.activeFile);
-    XLSX.writeFile(wb, this.activeFile);
+    sheets.forEach((sheetName) => {
+      const ws = XLSX.utils.json_to_sheet(data[sheetName], { skipHeader: 1 });
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      console.log(wb, ws);
+    });
+
+    XLSX.writeFile(wb, FilesManager.activeFile);
   }
 }

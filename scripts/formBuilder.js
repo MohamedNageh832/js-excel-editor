@@ -2,33 +2,35 @@
 
 class FormBuilder {
   static wrapper = document.querySelector(".wrapper");
+  static storage = {};
 
   static createFindtotalForm({ insert, insertInto, index }) {
-    const { form, formBody, overlay, values } = Components.form("حدد الملفات");
+    const { form, formBody, formError, overlay, values } =
+      Components.form("حدد الملفات");
     const { openedFiles } = FilesManager;
     const fileNames = Object.keys(openedFiles);
 
-    const checkboxesLabel = Components.label("اختر من الملفات المفتوحة");
+    // const checkboxesLabel = Components.label("اختر من الملفات المفتوحة");
 
-    // Was added to prevent blurry text on overflow scroll
-    const formGroup = document.createElement("section");
-    formGroup.className = "form__group";
-    formGroup.appendChild(checkboxesLabel);
+    // // Was added to prevent blurry text on overflow scroll
+    // const formGroup = document.createElement("section");
+    // formGroup.className = "form__group";
+    // formGroup.appendChild(checkboxesLabel);
 
-    fileNames.forEach((file) => {
-      const checkbox = Components.checkbox(file, (e) => {
-        const checkboxValue = values["filesToMerge"];
-        const { value } = e.target;
+    // fileNames.forEach((file) => {
+    //   const checkbox = Components.checkbox(file, (e) => {
+    //     const checkboxValue = values["filesToMerge"];
+    //     const { value } = e.target;
 
-        if (checkboxValue) {
-          if (checkboxValue.includes(value)) {
-            values["filesToMerge"] = checkboxValue.filter((el) => el !== value);
-          } else values["filesToMerge"].push(value);
-        } else values["filesToMerge"] = [value];
-      });
+    //     if (checkboxValue) {
+    //       if (checkboxValue.includes(value)) {
+    //         values["filesToMerge"] = checkboxValue.filter((el) => el !== value);
+    //       } else values["filesToMerge"].push(value);
+    //     } else values["filesToMerge"] = [value];
+    //   });
 
-      formGroup.appendChild(checkbox);
-    });
+    //   formGroup.appendChild(checkbox);
+    // });
 
     const fileDropper = Components.fileDropper();
 
@@ -50,10 +52,20 @@ class FormBuilder {
       fileDropper.prepend(list);
 
       values.filesToMerge = files;
+
+      if (files.length > 0) {
+        formError.textContent = "";
+      }
     });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      if (!values.filesToMerge || values.filesToMerge?.length === 0) {
+        formError.textContent = "برجاء اختيار ملفات لحساب الاجمالي لها";
+        return;
+      }
+
       await FilesManager.importFiles({ filesToImport: values.filesToMerge });
 
       const fileNames = Array.from(values.filesToMerge).map(
@@ -61,15 +73,21 @@ class FormBuilder {
       );
 
       const columns = Utils.checkAvailableColumns(fileNames, [0]);
-      FormBuilder.chooseColumnsToMergeForm({ data: columns });
+      FormBuilder.chooseColumnsToMergeForm({
+        fileNames,
+        columnsAvailable: columns,
+        index,
+      });
+      form.remove();
+      overlay.remove();
     });
 
-    formBody.append(formGroup, fileDropper);
+    formBody.append(fileDropper);
     FormBuilder.wrapper.append(overlay, form);
   }
 
-  static chooseColumnsToMergeForm({ data }) {
-    const { form, formBody, overlay, values } =
+  static chooseColumnsToMergeForm({ fileNames, columnsAvailable, index }) {
+    const { form, formBody, formError, overlay, values } =
       Components.form("ادراج اجمالي ملفات");
 
     const SelectBoxData = ["العناوين", "حساب اجمالي الخلايا"];
@@ -78,7 +96,11 @@ class FormBuilder {
       data: SelectBoxData,
     });
 
-    values.columnsSelected = [];
+    select.addEventListener("change", (e) => {
+      values.insertDataType = e.target.value;
+    });
+
+    values.columnsSelected = this.storage.columnsAvailable || [];
 
     const formGroup = Components.formGroup();
     const checkboxesHolder = document.createElement("section");
@@ -92,19 +114,19 @@ class FormBuilder {
     const formGroupWrapper = document.createElement("section");
     formGroupWrapper.className = "form__group--wrapper";
 
-    data.forEach((column) => {
-      const checkbox = Components.checkbox(column, (e) => {
+    columnsAvailable.forEach((column) => {
+      const { checkbox, checkboxInput } = Components.checkbox(column, (e) => {
         const { checked, value } = e.target;
         const { columnsSelected } = values;
 
         if (checked) {
           if (columnsSelected.includes(value)) return;
           let adjuestedIndex = columnsSelected.length;
-          const index = data.indexOf(value);
+          const index = columnsAvailable.indexOf(value);
 
           for (let i = 0; i < columnsSelected.length; i++) {
             const column = columnsSelected[i];
-            const columnIndex = data.indexOf(column);
+            const columnIndex = columnsAvailable.indexOf(column);
 
             if (index < columnIndex) {
               adjuestedIndex = i;
@@ -113,16 +135,21 @@ class FormBuilder {
           }
 
           columnsSelected.splice(adjuestedIndex, 0, value);
-          // checkbox.remove();
+
+          if (columnsSelected.length > 0) formError.textContent = "";
         } else if (!checked) {
           if (!columnsSelected.includes(value)) return;
           const index = columnsSelected.indexOf(value);
 
           columnsSelected.splice(index, 1);
         }
-
-        console.log(values);
       });
+
+      if (this.storage.columnsAvailable?.includes(column)) {
+        console.log(this.storage.columnsAvailable, column);
+
+        checkboxInput.checked = true;
+      }
 
       checkbox.classList.add("form__checkbox--inline");
       checkboxesHolder.appendChild(checkbox);
@@ -132,38 +159,51 @@ class FormBuilder {
     formGroup.append(checkboxesLabel, formGroupWrapper);
     formBody.append(formGroup, select);
 
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const { columnsSelected, insertDataType } = values;
+      this.storage.columnsAvailable = columnsSelected;
+
+      if (!columnsSelected || columnsSelected?.length < 1) {
+        formError.textContent = "برجاء اختيار اعمدة لحسب الاجمالي لها";
+        return;
+      }
+
+      const { activeFile, activeSheet, openedFiles } = FilesManager;
+
+      const data = openedFiles[activeFile][activeSheet];
+      const sheets = Object.keys(openedFiles[activeFile]);
+
+      if (insertDataType === "حساب اجمالي الخلايا") {
+        const newData = Utils.mergeSimilarColumns(fileNames, columnsSelected);
+
+        openedFiles[activeFile][activeSheet][index] = newData[1];
+      } else {
+        openedFiles[activeFile][activeSheet][index] = columnsSelected;
+      }
+
+      Utils.createTable({
+        fileName: activeFile,
+        sheetName: activeSheet,
+        data,
+        sheets,
+      });
+
+      form.remove();
+      overlay.remove();
+    });
+
     FormBuilder.wrapper.append(overlay, form);
   }
 
-  /*const newData = Utils.mergeSimilarColumns(fileNames, columns);
-
-      if (insertInto === "row") {
-        const { activeFile, activeSheet, openedFiles } = FilesManager;
-        openedFiles[activeFile][activeSheet][index] =
-          insert === "title" ? newData[0] : newData[1];
-
-        const data = openedFiles[activeFile][activeSheet];
-        const sheets = Object.keys(openedFiles[activeFile]);
-
-        Utils.createTable({
-          fileName: activeFile,
-          sheetName: activeSheet,
-          data,
-          sheets,
-        });
-      } else if (insertInto === "column") {
-        console.log("this feature isn't implemented yet!");
-      } */
-
   static confirmDeleteForm({ index, dataIs }) {
-    const { form, formControls, overlay, values } =
-      Components.form("تأكيد الحذف؟");
+    const { form, formBody, overlay, values } = Components.form("تأكيد الحذف؟");
 
     const formMessage = document.createElement("span");
     formMessage.className = "text--secondary";
     formMessage.textContent = "هل تريد تأكيد حذف البيانات؟";
 
-    form.insertBefore(formMessage, formControls);
+    formBody.append(formMessage);
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -187,6 +227,9 @@ class FormBuilder {
         sheetName: activeSheet,
         data: openedFiles[activeFile][activeSheet],
       });
+
+      form.remove();
+      overlay.remove();
     });
 
     FormBuilder.wrapper.append(overlay, form);

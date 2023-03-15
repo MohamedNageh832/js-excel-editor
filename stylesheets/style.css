@@ -287,7 +287,7 @@ ul {
 }
 
 .table__cell {
-  overflow: hidden;
+  position: relative;
   text-overflow: ellipsis;
   min-width: 150px;
   height: 36.67px;
@@ -295,6 +295,21 @@ ul {
   border: 1px solid transparent;
   white-space: nowrap;
   text-align: right;
+}
+
+.table__cell--selected {
+  border: 2px solid var(--selection-color);
+}
+
+.table__cell--dragged::after,
+.table__cell--dragover::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ddd;
 }
 
 .table__cell:has(.cell__input:focus) {
@@ -375,6 +390,7 @@ ul {
   padding: var(--s2);
   border-radius: var(--bRadius1);
   background-color: #fff;
+  color: #000;
 }
 
 .context-menu__option {
@@ -522,6 +538,15 @@ ul {
   border-radius: var(--bRadius1);
 }
 
+.form__error {
+  color: var(--red);
+  font-size: var(--fs2);
+}
+
+.form__error:empty {
+  display: none;
+}
+
 .overlay {
   position: fixed;
   top: 0;
@@ -584,6 +609,8 @@ ul {
   transform: translate(-50%, -50%);
   border-radius: var(--bRadius1);
   background-color: var(--bg-2);
+  filter: blur(0.000001px);
+  -webkit-font-smoothing: antialiased;
 }
 
 .list {
@@ -795,11 +822,11 @@ ul {
   color: var(--secondary);
 }
 
-.contents-preview:not(.empty) .file-dropper {
+.table:not(:empty) + .file-dropper {
   display: none;
 }
 
-.contents-preview.dragover .file-dropper {
+.table:empty .file-dropper {
   position: absolute;
   top: 0;
   left: 0;

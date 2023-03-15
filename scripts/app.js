@@ -15,7 +15,10 @@ fileDroppers.forEach((el) =>
 
 const contentsPreview = document.querySelector(".contents-preview");
 
-contentsPreview.addEventListener("dragover", () => Utils.activateFileDropper());
+// contentsPreview.addEventListener("dragover", (e) => {
+//   if (e.currentTarget) return;
+//   Utils.activateFileDropper();
+// });
 
 // Taggle borders
 
@@ -32,15 +35,15 @@ toggleBordersBtn.addEventListener("click", () => {
 });
 
 // getTotalValues
-const getTotalBtn = document.querySelector(".get-total-btn");
+// const getTotalBtn = document.querySelector(".get-total-btn");
 
-getTotalBtn.addEventListener("click", () => {
-  const { openedFiles } = FilesManager;
-  const noFilesOpened = Object.keys(openedFiles).length < 1;
+// getTotalBtn.addEventListener("click", () => {
+//   const { openedFiles } = FilesManager;
+//   const noFilesOpened = Object.keys(openedFiles).length < 1;
 
-  if (noFilesOpened) return;
-  FormBuilder.createFindtotalForm();
-});
+//   if (noFilesOpened) return;
+//   FormBuilder.createFindtotalForm();
+// });
 
 // Create new file
 const createNewFileBtn = document.querySelector(".tabs__create-new");
@@ -49,7 +52,16 @@ createNewFileBtn.addEventListener("click", () => {
   Utils.createNewFile();
 });
 
+// Save file
+const saveBtn = document.querySelector(".save-btn");
+
+saveBtn.addEventListener("click", () => {
+  const { openedFiles, activeFile } = FilesManager;
+
+  FilesManager.saveExcelFile(openedFiles[activeFile]);
+});
+
 // =========================================== Window events ============================================= //
 
-window.addEventListener("click", Utils.closeContextMenus);
-window.addEventListener("contextmenu", Utils.closeContextMenus);
+window.addEventListener("click", Utils.handleWindowClick);
+window.addEventListener("contextmenu", Utils.handleWindowClick);

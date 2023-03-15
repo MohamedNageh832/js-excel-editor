@@ -1,6 +1,9 @@
 // ======================================== Utils =============================================== //
 
 class Utils {
+  static mousePosition = { x: undefined, y: undefined };
+  static dragStartLocation = false;
+
   static generateUniqueName(name) {
     let i = 1;
     while (true) {
@@ -67,7 +70,7 @@ class Utils {
 
       Utils.closeContextMenus(e);
 
-      const contextmenu = Components.cellContextMenu({
+      const contextmenu = Components.orderingCellContextMenu({
         index,
         dataIs: orientation,
         onRemove,
@@ -86,6 +89,93 @@ class Utils {
 
       td.classList.add("z-100");
       td.appendChild(contextmenu);
+    });
+
+    td.addEventListener("dragstart", Utils.onNumberingCellDragStart);
+    td.addEventListener("dragenter", (e) =>
+      Utils.onNumberingCellDragEnter(e, orientation)
+    );
+    td.addEventListener("dragleave", (e) =>
+      Utils.onNumberingCellDragLeave(e, orientation)
+    );
+    td.addEventListener("dragover", (e) => e.preventDefault());
+    td.addEventListener("drop", (e) =>
+      Utils.onNumberingCellDrop(e, orientation)
+    );
+  }
+
+  static onNumberingCellDragStart(e) {
+    Utils.dragStartLocation = {
+      rowIndex: +e.target.dataset.rowIndex,
+      columnIndex: +e.target.dataset.columnIndex,
+    };
+  }
+
+  static onNumberingCellDragEnter(e, orientation) {
+    let draggedOverCells;
+
+    if (orientation === "column") {
+      const index = +e.target.dataset.columnIndex + 1;
+      draggedOverCells = document.querySelectorAll(`td:nth-child(${index})`);
+    } else {
+      const index = +e.target.dataset.rowIndex + 2;
+      draggedOverCells = document.querySelectorAll(`tr:nth-child(${index}) td`);
+    }
+
+    draggedOverCells.forEach((cell) => {
+      cell.classList.add("table__cell--dragover");
+    });
+  }
+
+  static onNumberingCellDragLeave(e, orientation) {
+    let draggedOverCells;
+
+    if (orientation === "column") {
+      const index = +e.target.dataset.columnIndex + 1;
+      draggedOverCells = document.querySelectorAll(`td:nth-child(${index})`);
+    } else {
+      const index = +e.target.dataset.rowIndex + 2;
+      draggedOverCells = document.querySelectorAll(`tr:nth-child(${index}) td`);
+    }
+
+    draggedOverCells.forEach((cell) => {
+      cell.classList.remove("table__cell--dragover");
+    });
+  }
+
+  static onNumberingCellDrop(e, orientation) {
+    const { openedFiles, activeFile, activeSheet } = FilesManager;
+
+    const dragEndLocation = {
+      rowIndex: +e.target.dataset.rowIndex,
+      columnIndex: +e.target.dataset.columnIndex,
+    };
+
+    if (orientation === "column") {
+      const { columnIndex: fromIndex } = Utils.dragStartLocation;
+      const { columnIndex: toIndex } = dragEndLocation;
+
+      openedFiles[activeFile][activeSheet].forEach((row) => {
+        const cellData = row[fromIndex - 1];
+
+        row.splice(fromIndex - 1, 1);
+        row.splice(toIndex - 1, 0, cellData);
+      });
+    } else {
+      const { rowIndex: fromIndex } = Utils.dragStartLocation;
+      const { rowIndex: toIndex } = dragEndLocation;
+
+      const rowData = openedFiles[activeFile][activeSheet][fromIndex];
+
+      openedFiles[activeFile][activeSheet].splice(fromIndex, 1);
+      openedFiles[activeFile][activeSheet].splice(toIndex, 0, rowData);
+    }
+
+    Utils.createTable({
+      fileName: activeFile,
+      sheetName: activeSheet,
+      data: openedFiles[activeFile][activeSheet],
+      sheets: Object.keys(openedFiles[activeFile]),
     });
   }
 
@@ -292,25 +382,60 @@ class Utils {
     elements.forEach((el) => el.classList.remove("active"));
   }
 
-  static addTableCellEvents(td) {
-    td.addEventListener("click", () => {
-      const input = Components.input({
-        className: "cell__input",
-        value: td.textContent,
-      });
+  static addTableCellEvents({ td, rowIndex, columnIndex }) {
+    td.addEventListener("click", () => this.handleTableCellClick(td));
 
-      td.textContent = "";
-      td.appendChild(input);
-      input.focus();
+    td.addEventListener("contextmenu", (e) =>
+      this.handleTableCellContextMenu({ e, rowIndex, columnIndex })
+    );
 
-      input.addEventListener("click", (e) => e.stopPropagation());
+    td.addEventListener("dragstart", Utils.onTableCellDragStart);
+    td.addEventListener("dragenter", Utils.onTableCellDragEnter);
+    td.addEventListener("dragleave", Utils.onTableCellDragLeave);
+    td.addEventListener("dragover", (e) => e.preventDefault());
+    td.addEventListener("drop", Utils.onTableCellDrop);
+  }
 
-      input.addEventListener("blur", () => {
-        td.textContent = input.value;
-        input.remove();
-        Utils.saveTableChanges();
-      });
+  static handleTableCellClick(td) {
+    const input = Components.input({
+      className: "cell__input",
+      value: td.textContent,
     });
+
+    td.textContent = "";
+    td.appendChild(input);
+    input.focus();
+
+    input.addEventListener("click", (e) => e.stopPropagation());
+
+    input.addEventListener("blur", () => {
+      td.textContent = input.value;
+      input.remove();
+      Utils.saveTableChanges();
+    });
+  }
+
+  static handleTableCellContextMenu({ e, rowIndex, columnIndex }) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const onRemove = Utils.removeSelection;
+
+    Utils.closeContextMenus(e);
+
+    const contextmenu = Components.cellContextMenu({
+      rowIndex,
+      columnIndex,
+      onRemove,
+    });
+
+    td.classList.add("table__cell--selected");
+    td.appendChild(contextmenu);
+  }
+
+  static removeSelection() {
+    const selectedCells = document.querySelectorAll(".table__cell--selected");
+    selectedCells.forEach((el) => el.classList.remove("table__cell--selected"));
   }
 
   static createNewFile() {
@@ -329,6 +454,11 @@ class Utils {
     });
 
     FilesManager.openedFiles[fileName] = { [sheetName]: data };
+  }
+
+  static handleWindowClick(e) {
+    Utils.closeContextMenus(e);
+    Utils.removeSelection();
   }
 
   static closeContextMenus(e) {
@@ -384,6 +514,68 @@ class Utils {
     });
   }
 
+  static moveLeft({ rowIndex, columnIndex }) {
+    const { openedFiles, activeFile, activeSheet } = FilesManager;
+    const cellValue =
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex][columnIndex];
+    const nextCell =
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex][
+        columnIndex + 1
+      ];
+
+    if (nextCell === "" || nextCell === null) {
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex].splice(
+        columnIndex,
+        2,
+        "",
+        cellValue
+      );
+    } else {
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex].splice(
+        columnIndex,
+        0,
+        ""
+      );
+    }
+
+    Utils.createTable({
+      fileName: activeFile,
+      sheetName: activeSheet,
+      data: openedFiles[activeFile][activeSheet],
+    });
+  }
+
+  static moveRight({ rowIndex, columnIndex }) {
+    const { openedFiles, activeFile, activeSheet } = FilesManager;
+    const cellValue =
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex][columnIndex];
+    const previousCell =
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex][
+        columnIndex - 1
+      ];
+
+    if (previousCell === "" || previousCell === null) {
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex].splice(
+        columnIndex - 1,
+        2,
+        cellValue,
+        ""
+      );
+    } else {
+      FilesManager.openedFiles[activeFile][activeSheet][rowIndex].splice(
+        columnIndex + 1,
+        0,
+        ""
+      );
+    }
+
+    Utils.createTable({
+      fileName: activeFile,
+      sheetName: activeSheet,
+      data: openedFiles[activeFile][activeSheet],
+    });
+  }
+
   static formatString(string) {
     if (!string) return "";
 
@@ -394,5 +586,49 @@ class Utils {
       .replaceAll(/(ى)/gi, "ي")
       .replaceAll(/(ـ)/gi, "")
       .trim();
+  }
+
+  static onTableCellDragStart(e) {
+    Utils.dragStartLocation = {
+      rowIndex: +e.target.dataset.rowIndex,
+      columnIndex: +e.target.dataset.columnIndex,
+      value: e.target.textContent,
+    };
+  }
+
+  static onTableCellDragEnter(e) {
+    e.target.classList.add("table__cell--dragover");
+  }
+
+  static onTableCellDragLeave(e) {
+    e.target.classList.remove("table__cell--dragover");
+  }
+
+  static onTableCellDrop(e) {
+    const dragEndIndex = {
+      rowIndex: +e.target.dataset.rowIndex,
+      columnIndex: +e.target.dataset.columnIndex,
+      value: e.target.textContent,
+    };
+
+    Utils.swapCells(Utils.dragStartLocation, dragEndIndex);
+  }
+
+  static swapCells(item1Props, item2Props) {
+    const { openedFiles, activeFile, activeSheet } = FilesManager;
+
+    openedFiles[activeFile][activeSheet][item1Props.rowIndex][
+      item1Props.columnIndex
+    ] = item2Props.value;
+    openedFiles[activeFile][activeSheet][item2Props.rowIndex][
+      item2Props.columnIndex
+    ] = item1Props.value;
+
+    Utils.createTable({
+      fileName: activeFile,
+      sheetName: activeSheet,
+      data: openedFiles[activeFile][activeSheet],
+      sheets: Object.keys(openedFiles[activeFile]),
+    });
   }
 }
