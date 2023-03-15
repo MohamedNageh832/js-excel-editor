@@ -211,6 +211,10 @@ class Utils {
     Components.tableBody(previewTable, adjustedData);
   }
 
+  static clearTable() {
+    previewTable.textContent = "";
+  }
+
   static makeRowSameLength(data) {
     const rowLength = data.reduce((prev, curr) => {
       if (!Array.isArray(curr)) return;
@@ -236,7 +240,11 @@ class Utils {
     if (oldValue === newValue) return;
 
     if (!newValue.includes(".xlsx")) newValue = `${newValue}.xlsx`;
+
+    const closeBtn = Components.closeTabBtn(newValue);
+
     parentEl.textContent = newValue;
+    parentEl.appendChild(closeBtn);
 
     FilesManager.activeFile = newValue;
     FilesManager.openedFiles[newValue] = FilesManager.openedFiles[oldValue];

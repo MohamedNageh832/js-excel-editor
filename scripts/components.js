@@ -76,10 +76,15 @@ class Components {
 
       const openedFilesCount = openedFilesNames.length - 1;
 
+      button.parentElement.remove();
       if (openedFilesCount < 1) {
         fileDroppers[1].classList.remove("hidden");
         contentsPreview.classList.add("empty");
-      } else if (prevFile) fileToOpen = prevFile;
+        Utils.clearTable();
+        return;
+      }
+
+      if (prevFile) fileToOpen = prevFile;
       else if (nextFile) fileToOpen = nextFile;
 
       const sheets = Object.keys(openedFiles[fileToOpen]);
@@ -94,8 +99,6 @@ class Components {
       tabs.forEach((el) => {
         if (el.textContent === fileToOpen) el.classList.add("active");
       });
-
-      button.parentElement.remove();
     });
 
     return button;
