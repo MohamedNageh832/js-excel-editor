@@ -255,6 +255,7 @@ class Components {
     const options = [
       {
         text: "اضافة اجمالي ملفات",
+        icon: "./assets/svg/file-circle-plus.svg",
         action: () => {
           FormBuilder.createFindtotalForm({
             insert: "values",
@@ -265,22 +266,37 @@ class Components {
       },
       {
         text: dataIs === "row" ? "حذف الصف" : "حذف العمود",
+        icon: "./assets/svg/trash-can.svg",
         action: () => FormBuilder.confirmDeleteForm({ index, dataIs }),
       },
       {
         text: dataIs === "row" ? "اضافة صف قبل" : "اضافة عمود قبل",
+        icon:
+          dataIs === "row"
+            ? "./assets/svg/arrow-up.svg"
+            : "./assets/svg/arrow-right.svg",
         action: () => Utils.addBefore({ index, dataIs }),
       },
       {
         text: dataIs === "row" ? "اضافة صف بعد" : "اضافة عمود بعد",
+        icon:
+          dataIs === "row"
+            ? "./assets/svg/arrow-down.svg"
+            : "./assets/svg/arrow-left.svg",
         action: () => Utils.addAfter({ index, dataIs }),
       },
     ];
 
     options.forEach((option) => {
       const listItem = document.createElement("li");
+      const icon = document.createElement("img");
+
+      icon.className = "context-menu__icon";
+      icon.src = option.icon;
+
+      listItem.appendChild(icon);
       listItem.className = "context-menu__option";
-      listItem.textContent = option.text;
+      listItem.insertAdjacentText("beforeend", option.text);
       listItem.addEventListener("click", option.action);
       menu.appendChild(listItem);
     });

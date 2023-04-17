@@ -318,22 +318,23 @@ class Utils {
         const sheetData = openedFiles[fileName][sheet];
         const indexes = Utils.getIndexes(columns, sheetData[1]); // TODO: SHEET ROW IS TO BE DYNAMIC
 
-        result = sheetData.reduce((prev, currRow, i) => {
+        for (let i = 0; i < sheetData.length; i++) {
+          const currRow = sheetData[i];
           const isTotalValuesRow = currRow.some(
             (cell) =>
               Utils.formatString(cell) === Utils.formatString("الاجمالي")
           );
 
-          if (rowsToSkip.includes(i) || isTotalValuesRow) return prev;
+          if (rowsToSkip.includes(i)) continue;
+          else if (isTotalValuesRow) break;
 
           currRow.forEach((el, k) => {
             if (indexes[k] === -1 || isNaN(+el)) return;
-            prev[1][indexes[k]] += +el;
+            result[1][indexes[k]] += +el;
 
             // Utils.addRowValues();
           });
-          return prev;
-        }, result);
+        }
       });
     });
 

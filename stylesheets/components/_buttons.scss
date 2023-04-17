@@ -5,6 +5,8 @@
   gap: var(--s2);
   padding: var(--s2) var(--s3);
   border-radius: var(--bRadius1);
+  white-space: nowrap;
+  font-size: var(--fs3);
 }
 
 .btn--primary {
@@ -23,4 +25,10 @@
 .btn--secondary.active {
   background-color: var(--light-blue);
   color: var(--blue);
+}
+
+// Btn children
+.btn__icon {
+  width: 16px;
+  height: 16px;
 }

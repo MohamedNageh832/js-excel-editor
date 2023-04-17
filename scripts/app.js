@@ -50,6 +50,7 @@ const createNewFileBtn = document.querySelector(".tabs__create-new");
 
 createNewFileBtn.addEventListener("click", () => {
   Utils.createNewFile();
+  contentsPreview.classList.remove("empty");
 });
 
 // Save file
